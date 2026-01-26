@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -6,31 +5,22 @@ import plotly.express as px
 from utils.preprocessing import clean_text
 from utils.sentiment import predict_sentiment
 
-# -----------------------------------
-# PAGE CONFIG
-# -----------------------------------
-st.set_page_config(
-    page_title="Sentiment Analysis Dashboard",
-    layout="wide"
-)
+st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
 
 st.title("📊 Sentiment Analysis Dashboard")
 
-# -----------------------------------
-# FIX: ABSOLUTE PATH FOR DATASET
-# -----------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "data", "sentiment_clean.csv")
-
+# Load dataset
 @st.cache_data
 def load_data():
-    return pd.read_csv(DATA_PATH)
+    return pd.read_csv("data/sentiment_clean.csv")
 
 df = load_data()
 
-# -----------------------------------
-# SENTIMENT ANALYSIS
-# -----------------------------------
+# Sidebar
+st.sidebar.header("Options")
+show_raw = st.sidebar.checkbox("Show raw data")
+
+# Analyze sentiments
 sentiments = []
 scores = []
 
@@ -44,19 +34,17 @@ with st.spinner("Analyzing sentiments..."):
 df["sentiment"] = sentiments
 df["confidence"] = scores
 
-# -----------------------------------
-# VISUALIZATION
-# -----------------------------------
+# Visualization
 col1, col2 = st.columns(2)
 
 with col1:
-    fig1 = px.histogram(
+    fig = px.histogram(
         df,
         x="sentiment",
         color="sentiment",
         title="Sentiment Distribution"
     )
-    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     fig2 = px.box(
@@ -67,20 +55,16 @@ with col2:
     )
     st.plotly_chart(fig2, use_container_width=True)
 
-# -----------------------------------
-# USER INPUT
-# -----------------------------------
+# User input
 st.subheader("🔍 Try Your Own Text")
-
-user_text = st.text_area("Enter text")
+user_text = st.text_area("Enter text here")
 
 if st.button("Analyze"):
     label, score = predict_sentiment(clean_text(user_text))
     st.success(f"Sentiment: {label}")
     st.info(f"Confidence Score: {score:.2f}")
 
-# -----------------------------------
-# SHOW RAW DATA
-# -----------------------------------
-with st.expander("📄 Show Dataset"):
+# Show raw data
+if show_raw:
+    st.subheader("📄 Dataset Preview")
     st.dataframe(df.head(20))
