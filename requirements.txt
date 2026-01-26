@@ -1,7 +1,6 @@
-dash
 flask
-plotly
 pandas
 transformers
 torch
+plotly
 scikit-learn
