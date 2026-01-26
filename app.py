@@ -6,7 +6,7 @@ st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
 
 # Load data
 df 1 = pd.read_csv("https://raw.githubusercontent.com/nurulaina02/Sentiment-Analysis-Dashboard/refs/heads/main/combined_emotion_small.csv")
-df 2 = pd.read_csv("https://raw.githubusercontent.com/nurulaina02/Sentiment-Analysis-Dashboard/refs/heads/main/combined_emotion_small.csv")
+df 2 = pd.read_csv("https://raw.githubusercontent.com/nurulaina02/Sentiment-Analysis-Dashboard/refs/heads/main/combined_sentiment_data.csv")
 
 st.title("📊 Sentiment Analysis Dashboard")
 
