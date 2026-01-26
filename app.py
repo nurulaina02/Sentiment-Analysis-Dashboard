@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from utils.preprocessing import clean_text
-from utils.sentiment import predict_sentiment
+from preprocessing import clean_text
+from sentiment import predict_sentiment
 
 st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
 
