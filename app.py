@@ -1,52 +1,39 @@
-import dash
-from dash import html, dcc, Input, Output
-import plotly.express as px
+from flask import Flask, render_template
 import pandas as pd
+import plotly.express as px
 
-from preprocessing import clean_text
-from model import predict_sentiment
+from model.sentiment_model import predict_sentiment
+from utils.preprocessing import clean_text
 
-# Load dataset
-df = pd.read_csv("data/Sentiment Analysis Dataset.csv")
+app = Flask(__name__)
 
-# Assume columns: text, sentiment
-df["clean_text"] = df["text"].apply(clean_text)
-df["predicted"] = df["clean_text"].apply(lambda x: predict_sentiment(x)[0])
+@app.route("/")
+def index():
+    # Load dataset
+    df = pd.read_csv("data/sentiment_clean.csv")
 
-# Dash app
-app = dash.Dash(__name__)
+    # Clean text
+    df["clean_text"] = df["text"].apply(clean_text)
 
-app.layout = html.Div([
-    html.H1("Sentiment Analysis Dashboard"),
+    # Predict sentiment
+    sentiments = df["clean_text"].apply(predict_sentiment)
+    df["sentiment"] = sentiments.apply(lambda x: x[0])
 
-    dcc.Textarea(
-        id="input-text",
-        placeholder="Enter text to analyze...",
-        style={"width": "100%", "height": 120}
-    ),
+    # Count sentiment
+    sentiment_count = df["sentiment"].value_counts().reset_index()
+    sentiment_count.columns = ["Sentiment", "Count"]
 
-    html.Button("Analyze", id="analyze-btn", n_clicks=0),
-
-    html.Div(id="output-text", style={"marginTop": 20}),
-
-    dcc.Graph(
-        figure=px.histogram(
-            df, x="predicted",
-            title="Overall Sentiment Distribution"
-        )
+    # Plotly pie chart
+    fig = px.pie(
+        sentiment_count,
+        names="Sentiment",
+        values="Count",
+        title="Sentiment Distribution"
     )
-])
 
-@app.callback(
-    Output("output-text", "children"),
-    Input("analyze-btn", "n_clicks"),
-    Input("input-text", "value")
-)
-def analyze_text(n_clicks, text):
-    if not text:
-        return ""
-    label, score = predict_sentiment(clean_text(text))
-    return f"Predicted Sentiment: {label} (Confidence: {score:.2f})"
+    graph_html = fig.to_html(full_html=False)
+
+    return render_template("index.html", graph=graph_html)
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)
