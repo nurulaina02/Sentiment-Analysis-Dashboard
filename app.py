@@ -1,39 +1,50 @@
-from flask import Flask, render_template
+import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 from model.sentiment_model import predict_sentiment
 from utils.preprocessing import clean_text
 
-app = Flask(__name__)
+st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
 
-@app.route("/")
-def index():
-    # Load dataset
-    df = pd.read_csv("data/sentiment_clean.csv")
+st.title("📊 Sentiment Analysis Dashboard")
 
-    # Clean text
-    df["clean_text"] = df["text"].apply(clean_text)
+# Load data
+df = pd.read_csv("data/sentiment_clean.csv")
 
-    # Predict sentiment
-    sentiments = df["clean_text"].apply(predict_sentiment)
-    df["sentiment"] = sentiments.apply(lambda x: x[0])
+# Preprocess
+df["clean_text"] = df["text"].apply(clean_text)
 
-    # Count sentiment
-    sentiment_count = df["sentiment"].value_counts().reset_index()
-    sentiment_count.columns = ["Sentiment", "Count"]
+# Predict sentiment
+sentiments = df["clean_text"].apply(predict_sentiment)
+df["sentiment"] = sentiments.apply(lambda x: x[0])
+df["confidence"] = sentiments.apply(lambda x: x[1])
 
-    # Plotly pie chart
-    fig = px.pie(
-        sentiment_count,
-        names="Sentiment",
-        values="Count",
-        title="Sentiment Distribution"
-    )
+# Show data preview
+st.subheader("Dataset Preview")
+st.dataframe(df.head())
 
-    graph_html = fig.to_html(full_html=False)
+# Sentiment distribution
+sentiment_count = df["sentiment"].value_counts().reset_index()
+sentiment_count.columns = ["Sentiment", "Count"]
 
-    return render_template("index.html", graph=graph_html)
+fig = px.pie(
+    sentiment_count,
+    names="Sentiment",
+    values="Count",
+    title="Sentiment Distribution"
+)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+st.plotly_chart(fig, use_container_width=True)
+
+# User input (LIVE prediction)
+st.subheader("🔍 Live Sentiment Prediction")
+
+user_text = st.text_area("Enter text to analyze sentiment:")
+
+if st.button("Analyze"):
+    clean_input = clean_text(user_text)
+    label, score = predict_sentiment(clean_input)
+
+    st.success(f"Sentiment: {label}")
+    st.write(f"Confidence Score: {score:.2f}")
