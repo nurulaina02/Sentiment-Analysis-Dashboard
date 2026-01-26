@@ -5,7 +5,8 @@ import plotly.express as px
 st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
 
 # Load data
-df = pd.read_csv("data/processed/sentiment_results.csv")
+df 1 = pd.read_csv("https://raw.githubusercontent.com/nurulaina02/Sentiment-Analysis-Dashboard/refs/heads/main/combined_emotion_small.csv")
+df 2 = pd.read_csv("https://raw.githubusercontent.com/nurulaina02/Sentiment-Analysis-Dashboard/refs/heads/main/combined_emotion_small.csv")
 
 st.title("📊 Sentiment Analysis Dashboard")
 
