@@ -1,67 +1,70 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import importlib.util
-import os
 
-# ---------- LOAD sentiment_model.py ----------
-model_path = os.path.join("model", "sentiment_model.py")
-spec = importlib.util.spec_from_file_location("sentiment_model", model_path)
-sentiment_model = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(sentiment_model)
+from utils.preprocessing import clean_text
+from utils.sentiment import predict_sentiment
 
-predict_sentiment = sentiment_model.predict_sentiment
-
-# ---------- LOAD preprocessing.py ----------
-utils_path = os.path.join("utils", "preprocessing.py")
-spec_utils = importlib.util.spec_from_file_location("preprocessing", utils_path)
-preprocessing = importlib.util.module_from_spec(spec_utils)
-spec_utils.loader.exec_module(preprocessing)
-
-clean_text = preprocessing.clean_text
-
-# ---------- STREAMLIT APP ----------
 st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
+
 st.title("📊 Sentiment Analysis Dashboard")
 
+# Load dataset
 @st.cache_data
 def load_data():
     return pd.read_csv("data/sentiment_clean.csv")
 
 df = load_data()
-df["clean_text"] = df["text"].astype(str).apply(clean_text)
 
-@st.cache_resource
-def run_sentiment(texts):
-    return texts.apply(predict_sentiment)
+# Sidebar
+st.sidebar.header("Options")
+show_raw = st.sidebar.checkbox("Show raw data")
 
-sentiments = run_sentiment(df["clean_text"])
-df["sentiment"] = sentiments.apply(lambda x: x[0])
-df["confidence"] = sentiments.apply(lambda x: x[1])
+# Analyze sentiments
+sentiments = []
+scores = []
 
-st.subheader("Dataset Preview")
-st.dataframe(df.head())
+with st.spinner("Analyzing sentiments..."):
+    for text in df["text"]:
+        cleaned = clean_text(text)
+        label, score = predict_sentiment(cleaned)
+        sentiments.append(label)
+        scores.append(score)
 
-sentiment_count = df["sentiment"].value_counts().reset_index()
-sentiment_count.columns = ["Sentiment", "Count"]
+df["sentiment"] = sentiments
+df["confidence"] = scores
 
-fig = px.pie(
-    sentiment_count,
-    names="Sentiment",
-    values="Count",
-    title="Sentiment Distribution"
-)
+# Visualization
+col1, col2 = st.columns(2)
 
-st.plotly_chart(fig, use_container_width=True)
+with col1:
+    fig = px.histogram(
+        df,
+        x="sentiment",
+        color="sentiment",
+        title="Sentiment Distribution"
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("🔍 Live Sentiment Prediction")
+with col2:
+    fig2 = px.box(
+        df,
+        x="sentiment",
+        y="confidence",
+        title="Confidence Score by Sentiment"
+    )
+    st.plotly_chart(fig2, use_container_width=True)
 
-user_text = st.text_area("Enter text to analyze sentiment")
+# User input
+st.subheader("🔍 Try Your Own Text")
+user_text = st.text_area("Enter text here")
 
-if st.button("Analyze Sentiment"):
-    if user_text.strip():
-        label, score = predict_sentiment(clean_text(user_text))
-        st.success(f"Sentiment: {label}")
-        st.write(f"Confidence Score: {score:.2f}")
-    else:
-        st.warning("Please enter some text.")
+if st.button("Analyze"):
+    label, score = predict_sentiment(clean_text(user_text))
+    st.success(f"Sentiment: {label}")
+    st.info(f"Confidence Score: {score:.2f}")
+
+# Show raw data
+if show_raw:
+    st.subheader("📄 Dataset Preview")
+    st.dataframe(df.head(20))
