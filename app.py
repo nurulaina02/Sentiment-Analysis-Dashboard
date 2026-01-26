@@ -1,12 +1,14 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT_DIR)
 
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from sentiment_analysis_dashboard.model.sentiment_model import predict_sentiment
+from model.sentiment_model import predict_sentiment
 from utils.preprocessing import clean_text
 
 st.set_page_config(page_title="Sentiment Analysis Dashboard", layout="wide")
