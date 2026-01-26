@@ -35,12 +35,14 @@ search_text = st.sidebar.text_input("🔍 Search text")
 
 # ================== TITLE ==================
 st.title("📊 Sentiment Analysis Dashboard")
-st.caption("Interactive NLP Dashboard for Sentiment & Emotion Analysis")
+st.caption("Interactive NLP Dashboard for Sentiment and Emotion Analysis")
 
-# ================== SENTIMENT ANALYSIS ==================
+# =================================================
+# =============== SENTIMENT ANALYSIS ===============
+# =================================================
 if analysis_type == "Sentiment Analysis":
 
-    # ----- KPIs -----
+    # ----- KPI METRICS -----
     col1, col2, col3, col4 = st.columns(4)
 
     col1.metric("Total Reviews", len(sentiment_df))
@@ -57,7 +59,7 @@ if analysis_type == "Sentiment Analysis":
         (sentiment_df["sentiment"].str.lower() == "negative").sum()
     )
 
-    # ----- Sentiment Pie -----
+    # ----- SENTIMENT PIE CHART -----
     st.subheader("Sentiment Distribution")
 
     sentiment_counts = sentiment_df["sentiment"].value_counts().reset_index()
@@ -73,28 +75,7 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # ----- Sentiment Trend -----
-    if "date" in sentiment_df.columns:
-        st.subheader("Sentiment Trend Over Time")
-
-        trend_df = (
-            sentiment_df
-            .groupby(["date", "sentiment"])
-            .size()
-            .reset_index(name="count")
-        )
-
-        fig_trend = px.line(
-            trend_df,
-            x="date",
-            y="count",
-            color="sentiment",
-            title="Sentiment Trend"
-        )
-
-        st.plotly_chart(fig_trend, use_container_width=True)
-
-    # ----- Data Explorer -----
+    # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
 
     if search_text:
@@ -108,32 +89,33 @@ if analysis_type == "Sentiment Analysis":
         st.dataframe(sentiment_df.head(50))
 
 
-# ================== EMOTION ANALYSIS ==================
+# =================================================
+# ================ EMOTION ANALYSIS ================
+# =================================================
 else:
 
-    # ----- KPIs -----
-    st.subheader("Emotion Overview")
-
+    # ----- EMOTION KPIs -----
     emotion_counts = emotion_df["emotion"].value_counts().reset_index()
     emotion_counts.columns = ["Emotion", "Count"]
 
-    top_emotion = emotion_counts.iloc[0]["Emotion"]
-
     col1, col2 = st.columns(2)
     col1.metric("Total Records", len(emotion_df))
-    col2.metric("Most Common Emotion", top_emotion)
+    col2.metric("Most Common Emotion", emotion_counts.iloc[0]["Emotion"])
 
-    # ----- Emotion Bar Chart -----
+    # ----- EMOTION BAR CHART (DIFFERENT COLOURS) -----
+    st.subheader("Emotion Distribution")
+
     fig_emotion = px.bar(
         emotion_counts,
         x="Emotion",
         y="Count",
+        color="Emotion",          # 🎨 different colour per emotion
         title="Emotion Frequency Distribution"
     )
 
     st.plotly_chart(fig_emotion, use_container_width=True)
 
-    # ----- Data Explorer -----
+    # ----- DATA EXPLORER -----
     st.subheader("Explore Emotion Data")
 
     if search_text:
