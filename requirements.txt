@@ -1,0 +1,7 @@
+dash
+flask
+plotly
+pandas
+transformers
+torch
+scikit-learn
