@@ -4,7 +4,7 @@ import plotly.express as px
 
 # ================== PAGE CONFIG ==================
 st.set_page_config(
-    page_title="Sentiment Analysis Dashboard",
+    page_title="Sentiment and Emotion Analysis Dataset",
     page_icon="📊",
     layout="wide"
 )
