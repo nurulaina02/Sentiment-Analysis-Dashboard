@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -16,20 +15,26 @@ st.set_page_config(
 )
 
 st.title("📊 Sentiment Analysis Dashboard")
-st.write("Analyze and visualize sentiment using a Transformer-based model.")
+st.write("Upload a dataset and analyze sentiment using a Transformer-based model.")
 
 
 # --------------------------------------------------
-# Load dataset safely (works on Streamlit Cloud)
+# Upload dataset
 # --------------------------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+uploaded_file = st.file_uploader(
+    "Upload CSV file (must contain a 'text' column)",
+    type=["csv"]
+)
 
-@st.cache_data
-def load_data():
-    file_path = os.path.join(BASE_DIR, "data", "sentiment_clean.csv")
-    return pd.read_csv(file_path)
+if uploaded_file is None:
+    st.info("Please upload a CSV file to begin analysis.")
+    st.stop()
 
-df = load_data()
+df = pd.read_csv(uploaded_file)
+
+if "text" not in df.columns:
+    st.error("CSV must contain a column named 'text'")
+    st.stop()
 
 
 # --------------------------------------------------
@@ -41,8 +46,8 @@ def analyze_sentiment(dataframe):
     scores = []
 
     for text in dataframe["text"]:
-        cleaned_text = clean_text(text)
-        label, score = predict_sentiment(cleaned_text)
+        cleaned = clean_text(text)
+        label, score = predict_sentiment(cleaned)
         sentiments.append(label)
         scores.append(score)
 
@@ -56,34 +61,27 @@ with st.spinner("Running sentiment analysis..."):
 
 
 # --------------------------------------------------
-# Sidebar controls
-# --------------------------------------------------
-st.sidebar.header("Dashboard Options")
-show_data = st.sidebar.checkbox("Show dataset preview")
-
-
-# --------------------------------------------------
 # Visualizations
 # --------------------------------------------------
 col1, col2 = st.columns(2)
 
 with col1:
-    fig_sentiment = px.histogram(
+    fig1 = px.histogram(
         df,
         x="sentiment",
         color="sentiment",
         title="Sentiment Distribution"
     )
-    st.plotly_chart(fig_sentiment, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
-    fig_confidence = px.box(
+    fig2 = px.box(
         df,
         x="sentiment",
         y="confidence",
         title="Confidence Score by Sentiment"
     )
-    st.plotly_chart(fig_confidence, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True)
 
 
 # --------------------------------------------------
@@ -91,23 +89,19 @@ with col2:
 # --------------------------------------------------
 st.subheader("🔍 Analyze Your Own Text")
 
-user_input = st.text_area(
-    "Enter text below:",
-    placeholder="Type a review, tweet, or comment..."
-)
+user_text = st.text_area("Enter text")
 
 if st.button("Analyze Sentiment"):
-    if user_input.strip() == "":
+    if user_text.strip() == "":
         st.warning("Please enter some text.")
     else:
-        label, score = predict_sentiment(clean_text(user_input))
+        label, score = predict_sentiment(clean_text(user_text))
         st.success(f"Sentiment: {label}")
         st.info(f"Confidence Score: {score:.2f}")
 
 
 # --------------------------------------------------
-# Show raw data
+# Dataset preview
 # --------------------------------------------------
-if show_data:
-    st.subheader("📄 Dataset Preview")
-    st.dataframe(df.head(20))
+st.subheader("📄 Dataset Preview")
+st.dataframe(df.head(20))
