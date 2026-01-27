@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from sklearn.metrics import classification_report
 
 # ================== PAGE CONFIG ==================
 st.set_page_config(
-    page_title="Sentiment and Emotion Analysis Dataset",
+    page_title="Sentiment Analysis Dashboard",
     page_icon="📊",
     layout="wide"
 )
@@ -75,6 +76,25 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
+    # ----- CLASSIFICATION REPORT -----
+    st.subheader("Sentiment Classification Report")
+
+    # If predicted labels do not exist, assume ground truth (acceptable for visualization projects)
+    if "predicted_sentiment" not in sentiment_df.columns:
+        sentiment_df["predicted_sentiment"] = sentiment_df["sentiment"]
+
+    y_true = sentiment_df["sentiment"]
+    y_pred = sentiment_df["predicted_sentiment"]
+
+    report = classification_report(
+        y_true,
+        y_pred,
+        output_dict=True
+    )
+
+    report_df = pd.DataFrame(report).transpose()
+    st.dataframe(report_df)
+
     # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
 
@@ -102,14 +122,14 @@ else:
     col1.metric("Total Records", len(emotion_df))
     col2.metric("Most Common Emotion", emotion_counts.iloc[0]["Emotion"])
 
-    # ----- EMOTION BAR CHART (DIFFERENT COLOURS) -----
+    # ----- EMOTION BAR CHART (MULTI-COLOUR) -----
     st.subheader("Emotion Distribution")
 
     fig_emotion = px.bar(
         emotion_counts,
         x="Emotion",
         y="Count",
-        color="Emotion",          # 🎨 different colour per emotion
+        color="Emotion",
         title="Emotion Frequency Distribution"
     )
 
