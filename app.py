@@ -76,10 +76,10 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # ----- CLASSIFICATION REPORT -----
-    st.subheader("Sentiment Classification Report")
+    # ----- CLASSIFICATION REPORT (GOOD TABLE) -----
+    st.subheader("Sentiment Classification Performance")
 
-    # If predicted labels do not exist, assume ground truth (acceptable for visualization projects)
+    # If predicted labels do not exist, assume ground truth
     if "predicted_sentiment" not in sentiment_df.columns:
         sentiment_df["predicted_sentiment"] = sentiment_df["sentiment"]
 
@@ -93,7 +93,39 @@ if analysis_type == "Sentiment Analysis":
     )
 
     report_df = pd.DataFrame(report).transpose()
-    st.dataframe(report_df)
+
+    # Keep relevant rows only
+    report_df = report_df.loc[
+        report_df.index.isin(
+            ["Positive", "Neutral", "Negative", "macro avg", "weighted avg", "accuracy"]
+        )
+    ]
+
+    # Rename columns
+    report_df = report_df.rename(
+        columns={
+            "precision": "Precision",
+            "recall": "Recall",
+            "f1-score": "F1-Score",
+            "support": "Support"
+        }
+    )
+
+    # Round values
+    report_df = report_df.round(3)
+
+    # Extract accuracy
+    accuracy = report_df.loc["accuracy", "Precision"]
+    st.metric("Overall Accuracy", f"{accuracy:.2%}")
+
+    # Remove accuracy row from table
+    report_df = report_df.drop(index="accuracy")
+
+    # Display table
+    st.dataframe(
+        report_df,
+        use_container_width=True
+    )
 
     # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
