@@ -76,10 +76,10 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # ----- CLASSIFICATION REPORT TABLE (EXPLICIT FORMAT) -----
-    st.subheader("Sentiment Classification Performance")
+    # ----- CLASSIFICATION REPORT -----
+    st.subheader("Sentiment Classification Report")
 
-    # Ensure predicted labels exist
+    # If predicted labels do not exist, assume ground truth (acceptable for visualization projects)
     if "predicted_sentiment" not in sentiment_df.columns:
         sentiment_df["predicted_sentiment"] = sentiment_df["sentiment"]
 
@@ -92,36 +92,8 @@ if analysis_type == "Sentiment Analysis":
         output_dict=True
     )
 
-    # Build clean table explicitly
     report_df = pd.DataFrame(report).transpose()
-
-    report_df = report_df.loc[
-        ["Positive", "Neutral", "Negative", "macro avg", "weighted avg"]
-    ]
-
-    report_df.index = [
-        "Positive",
-        "Neutral",
-        "Negative",
-        "Macro Avg",
-        "Weighted Avg"
-    ]
-
-    report_df = report_df[
-        ["precision", "recall", "f1-score", "support"]
-    ]
-
-    report_df.columns = [
-        "Precision",
-        "Recall",
-        "F1-Score",
-        "Support"
-    ]
-
-    report_df = report_df.round(3)
-
-    # Display table
-    st.dataframe(report_df, use_container_width=True)
+    st.dataframe(report_df)
 
     # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
