@@ -76,10 +76,10 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # ----- CLASSIFICATION REPORT (GOOD TABLE) -----
+    # ----- CLASSIFICATION REPORT TABLE (EXPLICIT FORMAT) -----
     st.subheader("Sentiment Classification Performance")
 
-    # If predicted labels do not exist, assume ground truth
+    # Ensure predicted labels exist
     if "predicted_sentiment" not in sentiment_df.columns:
         sentiment_df["predicted_sentiment"] = sentiment_df["sentiment"]
 
@@ -92,40 +92,36 @@ if analysis_type == "Sentiment Analysis":
         output_dict=True
     )
 
+    # Build clean table explicitly
     report_df = pd.DataFrame(report).transpose()
 
-    # Keep relevant rows only
     report_df = report_df.loc[
-        report_df.index.isin(
-            ["Positive", "Neutral", "Negative", "macro avg", "weighted avg", "accuracy"]
-        )
+        ["Positive", "Neutral", "Negative", "macro avg", "weighted avg"]
     ]
 
-    # Rename columns
-    report_df = report_df.rename(
-        columns={
-            "precision": "Precision",
-            "recall": "Recall",
-            "f1-score": "F1-Score",
-            "support": "Support"
-        }
-    )
+    report_df.index = [
+        "Positive",
+        "Neutral",
+        "Negative",
+        "Macro Avg",
+        "Weighted Avg"
+    ]
 
-    # Round values
+    report_df = report_df[
+        ["precision", "recall", "f1-score", "support"]
+    ]
+
+    report_df.columns = [
+        "Precision",
+        "Recall",
+        "F1-Score",
+        "Support"
+    ]
+
     report_df = report_df.round(3)
 
-    # Extract accuracy
-    accuracy = report_df.loc["accuracy", "Precision"]
-    st.metric("Overall Accuracy", f"{accuracy:.2%}")
-
-    # Remove accuracy row from table
-    report_df = report_df.drop(index="accuracy")
-
     # Display table
-    st.dataframe(
-        report_df,
-        use_container_width=True
-    )
+    st.dataframe(report_df, use_container_width=True)
 
     # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
