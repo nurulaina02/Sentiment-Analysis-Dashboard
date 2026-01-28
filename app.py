@@ -38,6 +38,62 @@ search_text = st.sidebar.text_input("🔍 Search text")
 st.title("📊 Sentiment Analysis Dashboard")
 st.caption("Interactive NLP Dashboard for Sentiment and Emotion Analysis")
 
+# ================== PROJECT OVERVIEW ==================
+with st.expander("📌 Project Overview", expanded=True):
+
+    st.markdown("### 1. Objective")
+    st.markdown(
+        """
+        The objective of this project is to develop an interactive Natural Language Processing (NLP) 
+        dashboard that performs sentiment and emotion analysis on textual data. The dashboard aims 
+        to provide meaningful insights into public opinions and emotional patterns through 
+        clear visualizations and evaluation metrics.
+        """
+    )
+
+    st.markdown("### 2. Problem Statement")
+    st.markdown(
+        """
+        The rapid growth of user-generated textual data such as reviews and online comments 
+        makes manual analysis impractical and inefficient. There is a need for an automated 
+        system that can accurately classify sentiment and emotions while presenting the results 
+        in a user-friendly and interpretable manner.
+        """
+    )
+
+    st.markdown("### 3. Solution Architecture")
+    st.markdown(
+        """
+        The proposed solution follows a structured NLP pipeline:
+        
+        - **Data Source**: Kaggle Sentiment and Emotion Analysis Dataset  
+        - **Preprocessing**: Text cleaning and normalization  
+        - **Analysis Layer**: Sentiment polarity and emotion classification  
+        - **Evaluation Layer**: Precision, recall, F1-score, and support metrics  
+        - **Visualization Layer**: Interactive Streamlit dashboard  
+
+        This modular architecture ensures scalability, clarity, and ease of deployment.
+        """
+    )
+
+# ================== CONCLUSION ==================
+with st.expander("✅ Conclusion"):
+
+    st.markdown(
+        """
+        This project successfully demonstrates the application of Natural Language Processing 
+        techniques for sentiment and emotion analysis through an interactive dashboard. 
+        The integration of sentiment classification, emotion detection, and performance evaluation 
+        enables effective exploration and interpretation of textual data.
+
+        Streamlit provides an intuitive interface for real-time visualization, while the 
+        structured design of the solution supports future scalability. Overall, the dashboard 
+        serves as a practical analytical tool for understanding public opinions and emotional 
+        trends, with potential enhancements including real-time data integration and 
+        advanced machine learning models.
+        """
+    )
+
 # =================================================
 # =============== SENTIMENT ANALYSIS ===============
 # =================================================
@@ -76,10 +132,9 @@ if analysis_type == "Sentiment Analysis":
 
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-    # ----- CLASSIFICATION REPORT -----
-    st.subheader("Sentiment Classification Report")
+    # ----- CLASSIFICATION REPORT TABLE -----
+    st.subheader("Sentiment Classification Performance")
 
-    # If predicted labels do not exist, assume ground truth (acceptable for visualization projects)
     if "predicted_sentiment" not in sentiment_df.columns:
         sentiment_df["predicted_sentiment"] = sentiment_df["sentiment"]
 
@@ -93,7 +148,33 @@ if analysis_type == "Sentiment Analysis":
     )
 
     report_df = pd.DataFrame(report).transpose()
-    st.dataframe(report_df)
+
+    report_df = report_df.loc[
+        ["Positive", "Neutral", "Negative", "macro avg", "weighted avg"]
+    ]
+
+    report_df.index = [
+        "Positive",
+        "Neutral",
+        "Negative",
+        "Macro Avg",
+        "Weighted Avg"
+    ]
+
+    report_df = report_df[
+        ["precision", "recall", "f1-score", "support"]
+    ]
+
+    report_df.columns = [
+        "Precision",
+        "Recall",
+        "F1-Score",
+        "Support"
+    ]
+
+    report_df = report_df.round(3)
+
+    st.dataframe(report_df, use_container_width=True)
 
     # ----- DATA EXPLORER -----
     st.subheader("Explore Reviews")
@@ -114,7 +195,6 @@ if analysis_type == "Sentiment Analysis":
 # =================================================
 else:
 
-    # ----- EMOTION KPIs -----
     emotion_counts = emotion_df["emotion"].value_counts().reset_index()
     emotion_counts.columns = ["Emotion", "Count"]
 
@@ -122,7 +202,6 @@ else:
     col1.metric("Total Records", len(emotion_df))
     col2.metric("Most Common Emotion", emotion_counts.iloc[0]["Emotion"])
 
-    # ----- EMOTION BAR CHART (MULTI-COLOUR) -----
     st.subheader("Emotion Distribution")
 
     fig_emotion = px.bar(
@@ -135,7 +214,6 @@ else:
 
     st.plotly_chart(fig_emotion, use_container_width=True)
 
-    # ----- DATA EXPLORER -----
     st.subheader("Explore Emotion Data")
 
     if search_text:
