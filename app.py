@@ -24,9 +24,11 @@ def load_data():
 
 sentiment_df, emotion_df = load_data()
 
-# ================== PAGE NAVIGATION ==================
-page = st.selectbox(
-    "📂 Select Page",
+# ================== SIDEBAR NAVIGATION ==================
+st.sidebar.title("📂 Navigation")
+
+page = st.sidebar.radio(
+    "Select Page",
     ["🏠 Project Overview", "📊 Dashboard", "✅ Conclusion"]
 )
 
@@ -41,36 +43,30 @@ if page == "🏠 Project Overview":
     st.write(
         """
         The objective of this project is to develop an interactive Natural Language Processing (NLP) 
-        dashboard capable of performing sentiment and emotion analysis on textual data. 
-        The system aims to provide meaningful insights into public opinions and emotional trends 
-        through intuitive visualizations.
+        dashboard that performs sentiment and emotion analysis on textual data. 
+        The system aims to provide meaningful insights into public opinions and emotional patterns 
+        through clear visualizations.
         """
     )
 
     st.subheader("2. Problem Statement")
     st.write(
         """
-        With the rapid increase of user-generated text such as online reviews and social media comments, 
-        manual sentiment analysis has become inefficient and impractical. 
-        There is a need for an automated solution that can accurately classify sentiment and emotions 
-        while presenting results in a clear and user-friendly format.
+        The rapid growth of user-generated textual data such as online reviews and social media comments 
+        makes manual analysis inefficient and impractical. 
+        An automated solution is required to accurately classify sentiment and emotions 
+        while presenting the results in an intuitive and user-friendly interface.
         """
     )
 
     st.subheader("3. Solution Architecture")
-    st.write(
-        """
-        The proposed solution follows a modular NLP pipeline:
-        """
-    )
-
     st.markdown(
         """
         - **Dataset**: Kaggle Sentiment and Emotion Analysis Dataset  
         - **Preprocessing**: Text cleaning and normalization  
         - **Analysis**: Sentiment polarity and emotion classification  
         - **Evaluation**: Precision, Recall, and F1-score metrics  
-        - **Visualization**: Interactive Streamlit dashboard  
+        - **Visualization**: Streamlit interactive dashboard  
         """
     )
 
@@ -95,9 +91,18 @@ elif page == "📊 Dashboard":
         col1, col2, col3, col4 = st.columns(4)
 
         col1.metric("Total Reviews", len(sentiment_df))
-        col2.metric("Positive", (sentiment_df["sentiment"].str.lower() == "positive").sum())
-        col3.metric("Neutral", (sentiment_df["sentiment"].str.lower() == "neutral").sum())
-        col4.metric("Negative", (sentiment_df["sentiment"].str.lower() == "negative").sum())
+        col2.metric(
+            "Positive",
+            (sentiment_df["sentiment"].str.lower() == "positive").sum()
+        )
+        col3.metric(
+            "Neutral",
+            (sentiment_df["sentiment"].str.lower() == "neutral").sum()
+        )
+        col4.metric(
+            "Negative",
+            (sentiment_df["sentiment"].str.lower() == "negative").sum()
+        )
 
         st.subheader("Sentiment Distribution")
 
@@ -194,14 +199,12 @@ else:
 
     st.write(
         """
-        This project successfully demonstrates the application of Natural Language Processing techniques 
-        for sentiment and emotion analysis through an interactive dashboard. 
-        By integrating sentiment classification, emotion detection, and performance evaluation, 
-        the system provides meaningful insights into textual data.
+        This project successfully demonstrates the application of Natural Language Processing 
+        techniques for sentiment and emotion analysis using an interactive dashboard. 
+        The system provides meaningful insights into textual data through visual analytics 
+        and structured performance evaluation.
 
-        The use of Streamlit enables real-time visualization and interaction, while the modular 
-        architecture ensures scalability and ease of future enhancement. 
-        Overall, the dashboard serves as an effective analytical tool for understanding public 
-        opinions and emotional trends.
+        The use of Streamlit ensures usability and scalability, while the modular architecture 
+        allows for future enhancements such as real-time data integration and advanced models.
         """
     )
