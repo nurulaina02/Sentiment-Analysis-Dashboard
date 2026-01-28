@@ -43,9 +43,9 @@ if page == "🏠 Project Overview":
     st.write(
         """
         The objective of this project is to develop an interactive Natural Language Processing (NLP) 
-        dashboard that performs sentiment and emotion analysis on textual data. 
-        The system aims to provide meaningful insights into public opinions and emotional patterns 
-        through clear visualizations.
+        dashboard that performs sentiment and emotion analysis on textual data. The system aims to 
+        provide meaningful insights into public opinions and emotional patterns through clear and 
+        intuitive visualizations.
         """
     )
 
@@ -53,9 +53,8 @@ if page == "🏠 Project Overview":
     st.write(
         """
         The rapid growth of user-generated textual data such as online reviews and social media comments 
-        makes manual analysis inefficient and impractical. 
-        An automated solution is required to accurately classify sentiment and emotions 
-        while presenting the results in an intuitive and user-friendly interface.
+        makes manual analysis inefficient and impractical. An automated solution is required to 
+        accurately classify sentiment and emotions while presenting results in a user-friendly interface.
         """
     )
 
@@ -66,7 +65,7 @@ if page == "🏠 Project Overview":
         - **Preprocessing**: Text cleaning and normalization  
         - **Analysis**: Sentiment polarity and emotion classification  
         - **Evaluation**: Precision, Recall, and F1-score metrics  
-        - **Visualization**: Streamlit interactive dashboard  
+        - **Visualization**: Interactive Streamlit dashboard  
         """
     )
 
@@ -88,22 +87,15 @@ elif page == "📊 Dashboard":
     # ---------- SENTIMENT ANALYSIS ----------
     if analysis_type == "Sentiment Analysis":
 
+        # KPI Metrics
         col1, col2, col3, col4 = st.columns(4)
 
         col1.metric("Total Reviews", len(sentiment_df))
-        col2.metric(
-            "Positive",
-            (sentiment_df["sentiment"].str.lower() == "positive").sum()
-        )
-        col3.metric(
-            "Neutral",
-            (sentiment_df["sentiment"].str.lower() == "neutral").sum()
-        )
-        col4.metric(
-            "Negative",
-            (sentiment_df["sentiment"].str.lower() == "negative").sum()
-        )
+        col2.metric("Positive", (sentiment_df["sentiment"].str.lower() == "positive").sum())
+        col3.metric("Neutral", (sentiment_df["sentiment"].str.lower() == "neutral").sum())
+        col4.metric("Negative", (sentiment_df["sentiment"].str.lower() == "negative").sum())
 
+        # Sentiment Distribution Pie Chart
         st.subheader("Sentiment Distribution")
 
         sentiment_counts = sentiment_df["sentiment"].value_counts().reset_index()
@@ -113,11 +105,13 @@ elif page == "📊 Dashboard":
             sentiment_counts,
             names="Sentiment",
             values="Count",
-            hole=0.4
+            hole=0.4,
+            title="Overall Sentiment Breakdown"
         )
 
         st.plotly_chart(fig_sentiment, use_container_width=True)
 
+        # -------- FIXED CLASSIFICATION REPORT --------
         st.subheader("Sentiment Classification Performance")
 
         if "predicted_sentiment" not in sentiment_df.columns:
@@ -130,23 +124,25 @@ elif page == "📊 Dashboard":
         )
 
         report_df = pd.DataFrame(report).transpose()
-        report_df = report_df.loc[
-            ["Positive", "Neutral", "Negative", "macro avg", "weighted avg"]
-        ]
 
+        # SAFE label selection (prevents KeyError)
+        expected_labels = ["Positive", "Neutral", "Negative", "macro avg", "weighted avg"]
+        available_labels = [lbl for lbl in expected_labels if lbl in report_df.index]
+        report_df = report_df.loc[available_labels]
+
+        # Rename index nicely
         report_df.index = [
-            "Positive",
-            "Neutral",
-            "Negative",
-            "Macro Avg",
-            "Weighted Avg"
+            lbl.title() if "avg" not in lbl else lbl.replace(" avg", " Avg").title()
+            for lbl in report_df.index
         ]
 
+        # Select and rename columns
         report_df = report_df[["precision", "recall", "f1-score", "support"]]
         report_df.columns = ["Precision", "Recall", "F1-Score", "Support"]
 
         st.dataframe(report_df.round(3), use_container_width=True)
 
+        # Data Explorer
         st.subheader("Explore Reviews")
 
         if search_text:
@@ -174,7 +170,8 @@ elif page == "📊 Dashboard":
             emotion_counts,
             x="Emotion",
             y="Count",
-            color="Emotion"
+            color="Emotion",
+            title="Emotion Frequency Distribution"
         )
 
         st.plotly_chart(fig_emotion, use_container_width=True)
@@ -200,11 +197,12 @@ else:
     st.write(
         """
         This project successfully demonstrates the application of Natural Language Processing 
-        techniques for sentiment and emotion analysis using an interactive dashboard. 
-        The system provides meaningful insights into textual data through visual analytics 
-        and structured performance evaluation.
+        techniques for sentiment and emotion analysis through an interactive dashboard. 
+        By integrating sentiment classification, emotion detection, and performance evaluation, 
+        the system provides meaningful insights into textual data.
 
-        The use of Streamlit ensures usability and scalability, while the modular architecture 
-        allows for future enhancements such as real-time data integration and advanced models.
+        The use of Streamlit enables real-time visualization and interaction, while the modular 
+        architecture supports scalability and future enhancements such as real-time data integration 
+        and advanced machine learning models.
         """
     )
