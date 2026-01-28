@@ -25,7 +25,7 @@ def load_data():
 sentiment_df, emotion_df = load_data()
 
 # ================== SIDEBAR NAVIGATION ==================
-st.sidebar.title("📂 Navigation")
+st.sidebar.title("📂 Sentiment Analysis Dashboard")
 
 page = st.sidebar.radio(
     "Select Page",
